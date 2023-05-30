@@ -55,6 +55,8 @@ void fdset2ztfdset(JNIEnv* env, int nfds, zts_fd_set* src_fd_set, jobject dest_z
  */
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1init(JNIEnv* env, jclass clazz)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     jint rs = env->GetJavaVM(&jvm);
     return rs != JNI_OK ? ZTS_ERR_GENERAL : ZTS_ERR_OK;
 }
@@ -66,6 +68,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1socket
     jint type,
     jint protocol)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     int retval = zts_bsd_socket(family, type, protocol);
     return retval > -1 ? retval : -(zts_errno);   // Encode lwIP errno into return value for JNI functions only
 }
@@ -73,6 +78,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1socket
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1listen(JNIEnv* env, jclass clazz, jint fd, int backlog)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     int retval = zts_bsd_listen(fd, backlog);
     return retval > -1 ? retval : -(zts_errno);
 }
@@ -83,6 +91,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1accept
     jint fd,
     jobject addr)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     struct zts_sockaddr_storage ss;
     zts_socklen_t addrlen = sizeof(struct zts_sockaddr_storage);
     int retval = zts_bsd_accept(fd, (zts_sockaddr*)&ss, &addrlen);
@@ -93,6 +103,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1accept
 JNIEXPORT jboolean JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1getsockname(JNIEnv* env, jclass clazz, jint fd, jobject addr)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     struct zts_sockaddr_storage ss;
     zts_socklen_t addrlen = sizeof(struct zts_sockaddr_storage);
     int retval = zts_bsd_getsockname(fd, (struct zts_sockaddr*)&ss, &addrlen);
@@ -103,6 +115,8 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1getsockname(JNIEnv* env, jcla
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1getpeername(JNIEnv* env, jclass clazz, jint fd, jobject addr)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     struct zts_sockaddr_storage ss;
     int retval =
         zts_bsd_getpeername(fd, (struct zts_sockaddr*)&ss, (zts_socklen_t*)sizeof(struct zts_sockaddr_storage));
@@ -112,6 +126,9 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1getpeername(JNIEnv* env, jcla
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1close(JNIEnv* env, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_bsd_close(fd);
 }
 
@@ -125,6 +142,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1select
     jint timeout_sec,
     jint timeout_usec)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     struct zts_timeval _timeout;
     _timeout.tv_sec = timeout_sec;
     _timeout.tv_usec = timeout_usec;
@@ -160,6 +179,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1select
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1fcntl(JNIEnv* env, jclass clazz, jint fd, jint cmd, jint flags)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     int retval = zts_bsd_fcntl(fd, cmd, flags);
     return retval > -1 ? retval : -(zts_errno);
 }
@@ -171,6 +193,8 @@ JNIEXPORT int JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1ioctl(
     jlong request,
     jobject argp)
 {
+    ZTS_UNUSED_ARG(thisObj);
+
     int retval = ZTS_ERR_OK;
     if (request == FIONREAD) {
         int bytesRemaining = 0;
@@ -198,6 +222,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1send(
     jbyteArray buf,
     int flags)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_send(fd, data, env->GetArrayLength(buf), flags);
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -212,6 +238,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1sendto
     jint flags,
     jobject addr)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     struct zts_sockaddr_storage ss;
     zta2ss(env, &ss, addr);
@@ -229,6 +257,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1recv(
     jbyteArray buf,
     jint flags)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_recv(fd, data, env->GetArrayLength(buf), flags);
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -243,6 +273,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1recvfr
     jint flags,
     jobject addr)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     zts_socklen_t addrlen = sizeof(struct zts_sockaddr_storage);
     struct zts_sockaddr_storage ss;
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
@@ -255,6 +287,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1recvfr
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1read(JNIEnv* env, jclass clazz, jint fd, jbyteArray buf)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_read(fd, data, env->GetArrayLength(buf));
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -275,6 +309,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1read_1
     jint offset,
     jint len)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_read_offset(fd, data, offset, len);
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -288,6 +324,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1read_1
     jbyteArray buf,
     jint len)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_read(fd, data, len);
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -297,6 +335,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1read_1
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1write(JNIEnv* env, jclass clazz, jint fd, jbyteArray buf)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(buf, NULL);
     int retval = zts_bsd_write(fd, data, env->GetArrayLength(buf));
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -320,6 +360,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1write_
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1write_1byte(JNIEnv* env, jclass clazz, jint fd, jbyte buf)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     int retval = zts_bsd_write(fd, &buf, 1);
     return retval > -1 ? retval : -(zts_errno);
 }
@@ -327,6 +370,9 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1write_1byte(JNIEnv* env, jcla
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1shutdown(JNIEnv* env, jclass clazz, int fd, int how)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_bsd_shutdown(fd, how);
 }
 
@@ -448,11 +494,17 @@ void zta2ss(JNIEnv* env, struct zts_sockaddr_storage* ss, jobject addr)
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1get_1port(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_node_get_port();
 }
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1stop(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     int res = zts_node_stop();
     java_detach_from_thread();
     return res;
@@ -460,6 +512,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1stop(
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1free(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     int res = zts_node_free();
     java_detach_from_thread();
     return res;
@@ -468,12 +523,18 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1free(
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1join(JNIEnv* env, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_join((uint64_t)net_id);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1leave(JNIEnv* env, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(env);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_leave((uint64_t)net_id);
 }
 
@@ -507,6 +568,8 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1from_1storage(JNIEnv* jenv, 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1set_1event_1handler(JNIEnv* env, jclass clazz, jobject callback)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     jclass eventListenerClass = env->GetObjectClass(callback);
     if (eventListenerClass == NULL) {
         fprintf(stderr, "Couldn't find class for ZeroTierEventListener instance");
@@ -523,6 +586,9 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1set_1event_1handler(JNIEnv* 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1set_1port(JNIEnv* jenv, jclass clazz, short port)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_init_set_port(port);
 }
 
@@ -538,6 +604,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1black
     jstring prefix,
     jint len)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     if (! prefix) {
         return ZTS_ERR_ARG;
     }
@@ -559,24 +627,36 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1set_roots(JNIEnv* jenv, jobj
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1allow_1net_1cache(JNIEnv* jenv, jclass clazz, jint allowed)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_init_allow_net_cache(allowed);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1allow_1peer_1cache(JNIEnv* jenv, jclass clazz, jint allowed)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_init_allow_peer_cache(allowed);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1allow_1roots_1cache(JNIEnv* jenv, jclass clazz, jint allowed)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_init_allow_roots_cache(allowed);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1allow_1id_1cache(JNIEnv* jenv, jclass clazz, jint allowed)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_init_allow_id_cache(allowed);
 }
 
@@ -586,6 +666,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1addr_1is_1a
     jlong net_id,
     jint family)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_addr_is_assigned(net_id, family);
 }
 
@@ -602,6 +685,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1addr_1is_1a
 JNIEXPORT jstring JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1addr_1get_1str(JNIEnv* jenv, jclass clazz, jlong net_id, jint family)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     char ip_str[ZTS_IP_MAX_STR_LEN] = { 0 };
     zts_addr_get_str(net_id, family, ip_str, ZTS_IP_MAX_STR_LEN);
     jstring result = jenv->NewStringUTF(ip_str);
@@ -683,6 +768,8 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1mac(JNIEnv* jenv, jclass
 JNIEXPORT jstring JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1mac_1str(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     char mac_str[ZTS_MAC_ADDRSTRLEN] = { 0 };
     zts_net_get_mac_str(net_id, mac_str, ZTS_MAC_ADDRSTRLEN);
     jstring result = jenv->NewStringUTF(mac_str);
@@ -692,12 +779,18 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1mac_1str(JNIEnv* jenv, j
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1broadcast(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_get_broadcast(net_id);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1mtu(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_get_mtu(net_id);
 }
 
@@ -714,12 +807,18 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1n
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1status(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_get_status(net_id);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1type(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_get_type(net_id);
 }
 
@@ -729,16 +828,25 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1route_1is_1
     jlong net_id,
     jint family)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_route_is_assigned(net_id, family);
 }
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1start(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_node_start();
 }
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1is_1online(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_node_is_online();
 }
 
@@ -762,12 +870,18 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1moon_1orbit
     jlong moon_roots_id,
     jlong moon_seed)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_moon_orbit(moon_roots_id, moon_seed);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1moon_1deorbit(JNIEnv* jenv, jclass clazz, jlong moon_roots_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_moon_deorbit(moon_roots_id);
 }
 
@@ -779,6 +893,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1connect(
     jint port,
     jint timeout_ms)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     if (! ipstr) {
         return ZTS_ERR_ARG;
     }
@@ -794,6 +910,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1connect(
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1bind(JNIEnv* jenv, jclass clazz, jint fd, jstring ipstr, jint port)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     if (! ipstr) {
         return ZTS_ERR_ARG;
     }
@@ -827,12 +945,18 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1udp_1client(JNIEnv* jenv, jobject 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1no_1delay(JNIEnv* jenv, jclass clazz, jint fd, jint enabled)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_no_delay(fd, enabled);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1no_1delay(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_no_delay(fd);
 }
 
@@ -843,36 +967,54 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1linger
     jint enabled,
     jint value)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_linger(fd, enabled, value);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1linger_1enabled(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_linger_enabled(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1linger_1value(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_linger_value(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1pending_1data_1size(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_pending_data_size(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1reuse_1addr(JNIEnv* jenv, jclass clazz, jint fd, jint enabled)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_reuse_addr(fd, enabled);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1reuse_1addr(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_reuse_addr(fd);
 }
 
@@ -883,12 +1025,18 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1recv_1
     jint seconds,
     jint microseconds)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_recv_timeout(fd, seconds, microseconds);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1recv_1timeout(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_recv_timeout(fd);
 }
 
@@ -899,71 +1047,107 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1send_1
     jint seconds,
     jint microseconds)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_send_timeout(fd, seconds, microseconds);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1send_1timeout(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_send_timeout(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1send_1buf_1size(JNIEnv* jenv, jclass clazz, jint fd, jint size)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_send_buf_size(fd, size);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1send_1buf_1size(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_send_buf_size(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1recv_1buf_1size(JNIEnv* jenv, jclass clazz, jint fd, jint size)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_recv_buf_size(fd, size);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1recv_1buf_1size(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_recv_buf_size(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1ttl(JNIEnv* jenv, jclass clazz, jint fd, jint ttl)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_ttl(fd, ttl);
 }
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1ttl(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_ttl(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1blocking(JNIEnv* jenv, jclass clazz, jint fd, jint enabled)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_blocking(fd, enabled);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1blocking(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_blocking(fd);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1set_1keepalive(JNIEnv* jenv, jclass clazz, jint fd, jint enabled)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_set_keepalive(fd, enabled);
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1get_1keepalive(JNIEnv* jenv, jclass clazz, jint fd)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_get_keepalive(fd);
 }
 
@@ -989,17 +1173,26 @@ JNIEXPORT ip_addr* JNICALL dns_1get_1server(JNIEnv* jenv, jobject thisObj, uint8
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1lock_1obtain(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_core_lock_obtain();
 }
 
 JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1lock_1release(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_core_lock_release();
 }
 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1query_1addr_1count(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_core_query_addr_count(net_id);
 }
 
@@ -1017,6 +1210,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1query
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1query_1route_1count(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_core_query_route_count(net_id);
 }
 
@@ -1087,6 +1283,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1util_1roots
 JNIEXPORT void JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1util_1delay(JNIEnv* jenv, jclass clazz, jlong milliseconds)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     zts_util_delay(milliseconds);
 }
 
