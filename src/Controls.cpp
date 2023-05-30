@@ -102,7 +102,7 @@ int zts_init_set_event_handler(PythonDirectorCallbackClass* callback)
     int zts_init_set_event_handler(CppCallback callback)
 #endif
 #ifdef ZTS_ENABLE_JAVA
-        int zts_init_set_event_handler(jobject obj_ref, jmethodID id)
+        int zts_init_set_event_handler(jobject obj_ref, jmethodID id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 #endif
 #ifdef ZTS_C_API_ONLY
             int zts_init_set_event_handler(void (*callback)(void*))
@@ -142,13 +142,13 @@ int zts_init_force_tcp_relay(int enabled)
     return ZTS_ERR_OK;
 }
 
-int zts_init_blacklist_if(const char* prefix, unsigned int len)
+int zts_init_blacklist_if(const char* prefix, unsigned int len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->addInterfacePrefixToBlacklist(prefix, len);
 }
 
-int zts_init_set_roots(const void* roots_data, unsigned int len)
+int zts_init_set_roots(const void* roots_data, unsigned int len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->setRoots(roots_data, len);
@@ -160,51 +160,51 @@ int zts_init_set_low_bandwidth_mode(int enabled)
     return zts_service->setLowBandwidthMode(enabled);
 }
 
-int zts_init_set_port(unsigned short port)
+int zts_init_set_port(unsigned short port) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     zts_service->setPrimaryPort(port);
     return ZTS_ERR_OK;
 }
 
-int zts_init_set_random_port_range(unsigned short start_port, unsigned short end_port)
+int zts_init_set_random_port_range(unsigned short start_port, unsigned short end_port) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     zts_service->setRandomPortRange(start_port, end_port);
     return ZTS_ERR_OK;
 }
 
-int zts_init_allow_secondary_port(unsigned int allowed)
+int zts_init_allow_secondary_port(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowSecondaryPort(allowed);
 }
 
-int zts_init_allow_port_mapping(unsigned int allowed)
+int zts_init_allow_port_mapping(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowPortMapping(allowed);
 }
 
-int zts_init_allow_peer_cache(unsigned int allowed)
+int zts_init_allow_peer_cache(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowPeerCaching(allowed);
 }
 
-int zts_init_allow_net_cache(unsigned int allowed)
+int zts_init_allow_net_cache(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowNetworkCaching(allowed);
 }
 
-int zts_init_allow_roots_cache(unsigned int allowed)
+int zts_init_allow_roots_cache(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowRootSetCaching(allowed);
 }
 
-int zts_init_allow_id_cache(unsigned int allowed)
+int zts_init_allow_id_cache(unsigned int allowed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     return zts_service->allowIdentityCaching(allowed);
@@ -301,7 +301,7 @@ int zts_id_pair_is_valid(const char* key, unsigned int len)
     return false;
 }
 
-int zts_node_get_id_pair(char* key, unsigned int* key_dst_len)
+int zts_node_get_id_pair(char* key, unsigned int* key_dst_len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     int err = ZTS_ERR_OK;
@@ -314,7 +314,7 @@ int zts_node_get_id_pair(char* key, unsigned int* key_dst_len)
 #if defined(__WINDOWS__)
 DWORD WINAPI cbRun(LPVOID arg)
 #else
-void* cbRun(void* arg)
+void* cbRun(void* arg) REQUIRES(!events_m)
 #endif
 {
     ZTS_UNUSED_ARG(arg);
@@ -329,19 +329,19 @@ void* cbRun(void* arg)
     return NULL;
 }
 
-int zts_addr_is_assigned(uint64_t net_id, unsigned int family)
+int zts_addr_is_assigned(uint64_t net_id, unsigned int family) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(0);
     return zts_service->addrIsAssigned(net_id, family);
 }
 
-int zts_addr_get(uint64_t net_id, unsigned int family, struct zts_sockaddr_storage* addr)
+int zts_addr_get(uint64_t net_id, unsigned int family, struct zts_sockaddr_storage* addr) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getFirstAssignedAddr(net_id, family, addr);
 }
 
-int zts_addr_get_str(uint64_t net_id, unsigned int family, char* dst, unsigned int len)
+int zts_addr_get_str(uint64_t net_id, unsigned int family, char* dst, unsigned int len) REQUIRES(!service_m)
 {
     // No service lock required since zts_addr_get will lock it
     if (net_id == 0) {
@@ -372,39 +372,39 @@ int zts_addr_get_str(uint64_t net_id, unsigned int family, char* dst, unsigned i
     return ZTS_ERR_OK;
 }
 
-int zts_addr_get_all(uint64_t net_id, struct zts_sockaddr_storage* addr, unsigned int* count)
+int zts_addr_get_all(uint64_t net_id, struct zts_sockaddr_storage* addr, unsigned int* count) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getAllAssignedAddr(net_id, addr, count);
 }
 
-int zts_core_lock_obtain()
+int zts_core_lock_obtain() REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_service->obtainLock();
     return ZTS_ERR_OK;
 }
 
-int zts_core_lock_release()
+int zts_core_lock_release() REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_service->releaseLock();
     return ZTS_ERR_OK;
 }
 
-int zts_core_query_addr_count(uint64_t net_id)
+int zts_core_query_addr_count(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->addressCount(net_id);
 }
 
-int zts_core_query_addr(uint64_t net_id, unsigned int idx, char* addr, unsigned int len)
+int zts_core_query_addr(uint64_t net_id, unsigned int idx, char* addr, unsigned int len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getAddrAtIdx(net_id, idx, addr, len);
 }
 
-int zts_core_query_route_count(uint64_t net_id)
+int zts_core_query_route_count(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->routeCount(net_id);
@@ -417,7 +417,7 @@ int zts_core_query_route(
     char* via,
     unsigned int len,
     uint16_t* flags,
-    uint16_t* metric)
+    uint16_t* metric) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getRouteAtIdx(net_id, idx, target, via, len, flags, metric);
@@ -434,42 +434,42 @@ int zts_core_query_path(uint64_t peer_id, unsigned int idx, char* path, unsigned
     return zts_service->getPathAtIdx(peer_id, idx, path, len);
 }
 
-int zts_core_query_mc_count(uint64_t net_id)
+int zts_core_query_mc_count(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->multicastSubCount(net_id);
 }
-int zts_core_query_mc(uint64_t net_id, unsigned int idx, uint64_t* mac, uint32_t* adi)
+int zts_core_query_mc(uint64_t net_id, unsigned int idx, uint64_t* mac, uint32_t* adi) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getMulticastSubAtIdx(net_id, idx, mac, adi);
 }
 
-int zts_net_join(const uint64_t net_id)
+int zts_net_join(const uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->join(net_id);
 }
 
-int zts_net_leave(const uint64_t net_id)
+int zts_net_leave(const uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->leave(net_id);
 }
 
-int zts_net_transport_is_ready(const uint64_t net_id)
+int zts_net_transport_is_ready(const uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->networkIsReady(net_id);
 }
 
-uint64_t zts_net_get_mac(uint64_t net_id)
+uint64_t zts_net_get_mac(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getMACAddress(net_id);
 }
 
-ZTS_API int ZTCALL zts_net_get_mac_str(uint64_t net_id, char* dst, unsigned int len)
+ZTS_API int ZTCALL zts_net_get_mac_str(uint64_t net_id, char* dst, unsigned int len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     if (! dst || len < ZTS_MAC_ADDRSTRLEN) {
@@ -489,37 +489,37 @@ ZTS_API int ZTCALL zts_net_get_mac_str(uint64_t net_id, char* dst, unsigned int 
     return ZTS_ERR_OK;
 }
 
-int zts_net_get_broadcast(uint64_t net_id)
+int zts_net_get_broadcast(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNetworkBroadcast(net_id);
 }
 
-int zts_net_get_mtu(uint64_t net_id)
+int zts_net_get_mtu(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNetworkMTU(net_id);
 }
 
-int zts_net_get_name(uint64_t net_id, char* dst, unsigned int len)
+int zts_net_get_name(uint64_t net_id, char* dst, unsigned int len) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNetworkName(net_id, dst, len);
 }
 
-int zts_net_get_status(uint64_t net_id)
+int zts_net_get_status(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNetworkStatus(net_id);
 }
 
-int zts_net_get_type(uint64_t net_id)
+int zts_net_get_type(uint64_t net_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNetworkType(net_id);
 }
 
-int zts_route_is_assigned(uint64_t net_id, unsigned int family)
+int zts_route_is_assigned(uint64_t net_id, unsigned int family) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->networkHasRoute(net_id, family);
@@ -529,7 +529,7 @@ int zts_route_is_assigned(uint64_t net_id, unsigned int family)
 #if defined(__WINDOWS__)
 DWORD WINAPI _runNodeService(LPVOID arg)
 #else
-void* _runNodeService(void* arg)
+void* _runNodeService(void* arg) REQUIRES(!service_m) REQUIRES(!events_m) REQUIRES(!lwip_state_m) REQUIRES(zts_service->_localConfig_m)
 #endif
 {
     ZTS_UNUSED_ARG(arg);
@@ -559,7 +559,7 @@ void* _runNodeService(void* arg)
     return NULL;
 }
 
-int zts_node_start()
+int zts_node_start() REQUIRES(!service_m) REQUIRES(!events_m) REQUIRES(!lwip_state_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE_OFFLINE();
     // Start TCP/IP stack
@@ -601,25 +601,25 @@ int zts_node_start()
     return ZTS_ERR_OK;
 }
 
-int zts_node_is_online()
+int zts_node_is_online() REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(0);
     return zts_service->nodeIsOnline();
 }
 
-uint64_t zts_node_get_id()
+uint64_t zts_node_get_id() REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getNodeId();
 }
 
-int zts_node_get_port()
+int zts_node_get_port() REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     return zts_service->getPrimaryPort();
 }
 
-int zts_node_stop()
+int zts_node_stop() REQUIRES(!service_m) REQUIRES(zts_service->_run_m) REQUIRES(zts_service->_localConfig_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_events->clrState(ZTS_STATE_NODE_RUNNING);
@@ -630,7 +630,7 @@ int zts_node_stop()
     return ZTS_ERR_OK;
 }
 
-int zts_node_free()
+int zts_node_free() REQUIRES(!service_m) REQUIRES(!lwip_state_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_events->setState(ZTS_STATE_FREE_CALLED);
@@ -645,14 +645,14 @@ int zts_node_free()
     return ZTS_ERR_OK;
 }
 
-int zts_moon_orbit(uint64_t moon_roots_id, uint64_t moon_seed)
+int zts_moon_orbit(uint64_t moon_roots_id, uint64_t moon_seed) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_service->orbit(moon_roots_id, moon_seed);
     return ZTS_ERR_OK;
 }
 
-int zts_moon_deorbit(uint64_t moon_roots_id)
+int zts_moon_deorbit(uint64_t moon_roots_id) REQUIRES(!service_m) REQUIRES(zts_service->_run_m)
 {
     ACQUIRE_SERVICE(ZTS_ERR_SERVICE);
     zts_service->deorbit(moon_roots_id);

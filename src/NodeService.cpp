@@ -55,7 +55,7 @@ static int SnodeVirtualNetworkConfigFunction(
     return reinterpret_cast<NodeService*>(uptr)->nodeVirtualNetworkConfigFunction(net_id, nuptr, op, nwconf);
 }
 
-static void SnodeEventCallback(ZT_Node* node, void* uptr, void* tptr, enum ZT_Event event, const void* metaData)
+static void SnodeEventCallback(ZT_Node* node, void* uptr, void* tptr, enum ZT_Event event, const void* metaData) // REQUIRES(uptr->_localConfig_m)
 {
     ZTS_UNUSED_ARG(node);
     ZTS_UNUSED_ARG(tptr);

@@ -66,6 +66,9 @@ int last_state_check;
 #define GET_FLAGS(f)  ((service_state & f) > 0)
 
 // Lock to guard access to callback function pointers.
+//
+// events_m lives in Events.cpp
+//
 Mutex events_m;
 
 #ifdef ZTS_ENABLE_PINVOKE

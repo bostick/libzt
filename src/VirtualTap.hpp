@@ -30,6 +30,8 @@
 #include "Phy.hpp"
 #include "Thread.hpp"
 
+#include "b_mutex.h"
+
 namespace ZeroTier {
 
 /* Forward declarations */
@@ -86,25 +88,25 @@ class VirtualTap {
     /**
      * Return whether this tap has been assigned an IPv4 address.
      */
-    bool hasIpv4Addr();
+    bool hasIpv4Addr() REQUIRES(!_ips_m);
 
     /**
      * Return whether this tap has been assigned an IPv6 address.
      */
-    bool hasIpv6Addr();
+    bool hasIpv6Addr() REQUIRES(!_ips_m);
 
     /**
      * Adds an address to the user-space stack interface associated with
      * this VirtualTap
      * - Starts VirtualTap main thread ONLY if successful
      */
-    bool addIp(const InetAddress& ip);
+    bool addIp(const InetAddress& ip) REQUIRES(!_ips_m);
 
     /**
      * Removes an address from the user-space stack interface associated
      * with this VirtualTap
      */
-    bool removeIp(const InetAddress& ip);
+    bool removeIp(const InetAddress& ip) REQUIRES(!_ips_m);
 
     /**
      * Presents data to the user-space stack
@@ -114,7 +116,7 @@ class VirtualTap {
     /**
      * Scan multicast groups
      */
-    void scanMulticastGroups(std::vector<MulticastGroup>& added, std::vector<MulticastGroup>& removed);
+    void scanMulticastGroups(std::vector<MulticastGroup>& added, std::vector<MulticastGroup>& removed) REQUIRES(!_multicastGroups_m) REQUIRES(!_ips_m);
 
     /**
      * Set MTU
@@ -170,7 +172,7 @@ class VirtualTap {
 
     int _shutdownSignalPipe[2] = { 0 };
 
-    std::vector<MulticastGroup> _multicastGroups;
+    std::vector<MulticastGroup> _multicastGroups GUARDED_BY(_multicastGroups_m);
     Mutex _multicastGroups_m;
 
     void phyOnTcpConnect(PhySocket* sock, void** uptr, bool success)
@@ -224,7 +226,7 @@ void zts_lwip_wake_driver();
 /**
  * Returns whether the lwIP network stack is up and ready to process traffic
  */
-bool zts_lwip_is_up();
+bool zts_lwip_is_up() REQUIRES(!lwip_state_m);
 
 /**
  * @brief Initialize network stack semaphores, threads, and timers.
@@ -232,7 +234,7 @@ bool zts_lwip_is_up();
  * @usage This is called during the initial setup of each VirtualTap but is
  * only allowed to execute once
  */
-void zts_lwip_driver_init();
+void zts_lwip_driver_init() REQUIRES(!lwip_state_m);
 
 /**
  * @brief Shutdown the stack as completely as possible (not officially
@@ -243,7 +245,7 @@ void zts_lwip_driver_init();
  * interfaces will be brought down and all resources will be deallocated. A
  * full application restart will be required to bring the stack back online.
  */
-void zts_lwip_driver_shutdown();
+void zts_lwip_driver_shutdown() REQUIRES(!lwip_state_m);
 
 /**
  * @brief Requests that a netif be brought down and removed.

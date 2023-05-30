@@ -196,7 +196,7 @@ bool VirtualTap::removeIp(const InetAddress& ip)
     return true;
 }
 
-std::vector<InetAddress> VirtualTap::ips() const
+std::vector<InetAddress> VirtualTap::ips() const REQUIRES(!_ips_m)
 {
     Mutex::Lock _l(_ips_m);
     return _ips;

@@ -20,6 +20,14 @@
 #ifndef ZTS_SOCKETS_H
 #define ZTS_SOCKETS_H
 
+#include "b_mutex.h"
+
+#include "Mutex.hpp"
+
+namespace ZeroTier {
+    extern Mutex service_m;
+}
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -1224,7 +1232,7 @@ ZTS_API int ZTCALL zts_id_pair_is_valid(const char* key, unsigned int len);
  * @return `ZTS_ERR_OK` if successful, `ZTS_ERR_SERVICE` if the node
  *     experiences a problem, `ZTS_ERR_ARG` if invalid argument.
  */
-ZTS_API int ZTCALL zts_init_from_storage(const char* path);
+ZTS_API int ZTCALL zts_init_from_storage(const char* path) REQUIRES(!ZeroTier::service_m);
 
 /**
  * @brief Instruct ZeroTier to use the identity provided in `key`. This is an initialization

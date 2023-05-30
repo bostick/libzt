@@ -33,6 +33,8 @@
 #include <string>
 #include <vector>
 
+#include "b_mutex.h"
+
 #define ZTS_SERVICE_THREAD_NAME        "ZTServiceThread"
 #define ZTS_EVENT_CALLBACK_THREAD_NAME "ZTEventCallbackThread"
 // Interface metric for ZeroTier taps -- this ensures that if we are on WiFi and
@@ -166,14 +168,14 @@ class NodeService {
     std::map<uint64_t, unsigned int> peerCache;
 
     // Local configuration and memo-ized information from it
-    Hashtable<uint64_t, std::vector<InetAddress> > _v4Hints;
-    Hashtable<uint64_t, std::vector<InetAddress> > _v6Hints;
-    Hashtable<uint64_t, std::vector<InetAddress> > _v4Blacklists;
-    Hashtable<uint64_t, std::vector<InetAddress> > _v6Blacklists;
-    std::vector<InetAddress> _globalV4Blacklist;
-    std::vector<InetAddress> _globalV6Blacklist;
-    std::vector<InetAddress> _allowManagementFrom;
-    std::vector<std::string> _interfacePrefixBlacklist;
+    Hashtable<uint64_t, std::vector<InetAddress> > _v4Hints GUARDED_BY(_localConfig_m);
+    Hashtable<uint64_t, std::vector<InetAddress> > _v6Hints GUARDED_BY(_localConfig_m);
+    Hashtable<uint64_t, std::vector<InetAddress> > _v4Blacklists GUARDED_BY(_localConfig_m);
+    Hashtable<uint64_t, std::vector<InetAddress> > _v6Blacklists GUARDED_BY(_localConfig_m);
+    std::vector<InetAddress> _globalV4Blacklist GUARDED_BY(_localConfig_m);
+    std::vector<InetAddress> _globalV6Blacklist GUARDED_BY(_localConfig_m);
+    std::vector<InetAddress> _allowManagementFrom GUARDED_BY(_localConfig_m);
+    std::vector<std::string> _interfacePrefixBlacklist GUARDED_BY(_localConfig_m);
     Mutex _localConfig_m;
 
     std::vector<InetAddress> explicitBind;
@@ -230,7 +232,7 @@ class NodeService {
         std::vector<InetAddress> managedIps;
         NetworkSettings settings;
     };
-    std::map<uint64_t, NetworkState> _nets;
+    std::map<uint64_t, NetworkState> _nets GUARDED_BY(_nets_m);
 
     /** Lock to control access to network configuration data */
     Mutex _nets_m;
@@ -239,11 +241,11 @@ class NodeService {
     /** Lock to control access to service run state */
     Mutex _run_m;
     // Set to false to force service to stop
-    volatile bool _run;
+    volatile bool _run GUARDED_BY(_run_m);
     /** Lock to control access to termination reason */
     Mutex _termReason_m;
     // Termination status information
-    ReasonForTermination _termReason;
+    ReasonForTermination _termReason GUARDED_BY(_termReason_m);
 
     std::string _fatalErrorMessage;
 
@@ -259,11 +261,11 @@ class NodeService {
     uint8_t _allowIdentityCaching;
     uint8_t _allowRootSetCaching;
 
-    char _publicIdStr[ZT_IDENTITY_STRING_BUFFER_LENGTH] = { 0 };
-    char _secretIdStr[ZT_IDENTITY_STRING_BUFFER_LENGTH] = { 0 };
+    char _publicIdStr[ZT_IDENTITY_STRING_BUFFER_LENGTH] GUARDED_BY(_store_m) = { 0 };
+    char _secretIdStr[ZT_IDENTITY_STRING_BUFFER_LENGTH] GUARDED_BY(_store_m) = { 0 };
 
     bool _userDefinedWorld;
-    char _rootsData[ZTS_STORE_DATA_LEN] = { 0 };
+    char _rootsData[ZTS_STORE_DATA_LEN] GUARDED_BY(_store_m) = { 0 };
     int _rootsDataLen = 0;
 
     /** Whether the node has successfully come online */
@@ -282,14 +284,14 @@ class NodeService {
     ~NodeService();
 
     /** Main service loop */
-    ReasonForTermination run();
+    ReasonForTermination run() REQUIRES(!_nets_m) REQUIRES(!lwip_state_m) REQUIRES(_localConfig_m); // acquires _run_m inside, so needs !_run_m, writes _run, so needs _run_m, reads _termReason, so needs _termReason_m, acquires so needs !_termReason_m
 
-    ReasonForTermination reasonForTermination() const;
+    ReasonForTermination reasonForTermination() const REQUIRES(!_termReason_m);
 
-    std::string fatalErrorMessage() const;
+    std::string fatalErrorMessage() const REQUIRES(!_termReason_m);
 
     /** Stop the node and service */
-    void terminate();
+    void terminate() REQUIRES(!_run_m) REQUIRES(_localConfig_m);
 
     /** Apply or update managed IPs for a configured network */
     void syncManagedStuff(NetworkState& n);
@@ -300,7 +302,7 @@ class NodeService {
         const struct sockaddr* localAddr,
         const struct sockaddr* from,
         void* data,
-        unsigned long len);
+        unsigned long len) REQUIRES(_localConfig_m) REQUIRES(!_run_m) REQUIRES(!_termReason_m);
 
     void phyOnTcpConnect(PhySocket* sock, void** uptr, bool success);
 
@@ -308,13 +310,13 @@ class NodeService {
         uint64_t net_id,
         void** nuptr,
         enum ZT_VirtualNetworkConfigOperation op,
-        const ZT_VirtualNetworkConfig* nwc);
+        const ZT_VirtualNetworkConfig* nwc) REQUIRES(!_nets_m);
 
-    void nodeEventCallback(enum ZT_Event event, const void* metaData);
+    void nodeEventCallback(enum ZT_Event event, const void* metaData) REQUIRES(!_run_m) REQUIRES(!_termReason_m) REQUIRES(_localConfig_m);
 
     zts_net_info_t* prepare_network_details_msg(const NetworkState& n);
 
-    void generateSyntheticEvents();
+    void generateSyntheticEvents() REQUIRES(!_nets_m) REQUIRES(!lwip_state_m);
 
     void sendEventToUser(unsigned int zt_event_code, const void* obj, unsigned int len = 0);
 
@@ -325,27 +327,27 @@ class NodeService {
     int leave(uint64_t net_id);
 
     /** Return whether the network is ready for transport services */
-    bool networkIsReady(uint64_t net_id) const;
+    bool networkIsReady(uint64_t net_id) const REQUIRES(!_nets_m);
 
     /** Lock the service so we can perform queries */
-    void obtainLock() const;
+    void obtainLock() const REQUIRES(!_nets_m);
 
     /** Unlock the service */
-    void releaseLock() const;
+    void releaseLock() const REQUIRES(_nets_m);
 
     /** Return number of assigned addresses on the network. Service must be locked. */
-    int addressCount(uint64_t net_id) const;
+    int addressCount(uint64_t net_id) const REQUIRES(_nets_m); // ?
 
     /** Return number of managed routes on the network. Service must be locked. */
-    int routeCount(uint64_t net_id) const;
+    int routeCount(uint64_t net_id) const REQUIRES(_nets_m); // ?
 
     /** Return number of multicast subscriptions on the network. Service must be locked. */
-    int multicastSubCount(uint64_t net_id) const;
+    int multicastSubCount(uint64_t net_id) const REQUIRES(_nets_m); // ?
 
     /** Return number of known physical paths to the peer. Service must be locked. */
     int pathCount(uint64_t peer_id) const;
 
-    int getAddrAtIdx(uint64_t net_id, unsigned int idx, char* dst, unsigned int len);
+    int getAddrAtIdx(uint64_t net_id, unsigned int idx, char* dst, unsigned int len) REQUIRES(_nets_m); // ?
 
     int getRouteAtIdx(
         uint64_t net_id,
@@ -354,28 +356,28 @@ class NodeService {
         char* via,
         unsigned int len,
         uint16_t* flags,
-        uint16_t* metric);
+        uint16_t* metric) REQUIRES(_nets_m);
 
-    int getMulticastSubAtIdx(uint64_t net_id, unsigned int idx, uint64_t* mac, uint32_t* adi);
+    int getMulticastSubAtIdx(uint64_t net_id, unsigned int idx, uint64_t* mac, uint32_t* adi) REQUIRES(_nets_m); // ?
 
     int getPathAtIdx(uint64_t peer_id, unsigned int idx, char* path, unsigned int len);
 
     /** Orbit a moon */
-    int orbit(uint64_t moonWorldId, uint64_t moonSeed);
+    int orbit(uint64_t moonWorldId, uint64_t moonSeed) REQUIRES(!_run_m);
 
     /** De-orbit a moon */
-    int deorbit(uint64_t moonWorldId);
+    int deorbit(uint64_t moonWorldId) REQUIRES(!_run_m);
 
     /** Return the integer-form of the node's identity */
-    uint64_t getNodeId();
+    uint64_t getNodeId() REQUIRES(!_run_m);
 
     /** Gets the node's identity */
     int getIdentity(char* keypair, unsigned int* len);
 
     /** Set the node's identity */
-    int setIdentity(const char* keypair, unsigned int len);
+    int setIdentity(const char* keypair, unsigned int len) REQUIRES(!_run_m) REQUIRES(!_store_m);
 
-    void nodeStatePutFunction(enum ZT_StateObjectType type, const uint64_t id[2], const void* data, unsigned int len);
+    void nodeStatePutFunction(enum ZT_StateObjectType type, const uint64_t id[2], const void* data, unsigned int len) REQUIRES(!_store_m);
 
     int nodeStateGetFunction(enum ZT_StateObjectType type, const uint64_t id[2], void* data, unsigned int maxlen);
 
@@ -396,7 +398,7 @@ class NodeService {
         const void* data,
         unsigned int len);
 
-    int nodePathCheckFunction(uint64_t ztaddr, const int64_t localSocket, const struct sockaddr_storage* remoteAddr);
+    int nodePathCheckFunction(uint64_t ztaddr, const int64_t localSocket, const struct sockaddr_storage* remoteAddr) REQUIRES(!_localConfig_m) REQUIRES(!_nets_m);
 
     int nodePathLookupFunction(uint64_t ztaddr, unsigned int family, struct sockaddr_storage* result);
 
@@ -409,38 +411,38 @@ class NodeService {
         const void* data,
         unsigned int len);
 
-    int shouldBindInterface(const char* ifname, const InetAddress& ifaddr);
+    int shouldBindInterface(const char* ifname, const InetAddress& ifaddr) REQUIRES(!_localConfig_m) REQUIRES(!_nets_m);
 
     unsigned int _getRandomPort(unsigned int minPort, unsigned int maxPort);
 
     int _trialBind(unsigned int port);
 
     /** Return whether the NodeService is running */
-    int isRunning() const;
+    int isRunning() const REQUIRES(_run_m);
 
     /** Return whether the node is online */
     int nodeIsOnline() const;
 
     /** Instruct the NodeService on where to look for identity files and caches */
-    int setHomePath(const char* homePath);
+    int setHomePath(const char* homePath) REQUIRES(!_run_m);
 
     /** Set the primary port */
-    int setPrimaryPort(unsigned short primaryPort);
+    int setPrimaryPort(unsigned short primaryPort) REQUIRES(!_run_m);
 
     /** Set random range to select backup ports from */
-    int setRandomPortRange(unsigned short startPort, unsigned short endPort);
+    int setRandomPortRange(unsigned short startPort, unsigned short endPort) REQUIRES(!_run_m);
 
     /** Get the primary port */
     unsigned short getPrimaryPort() const;
 
     /** Allow or disallow port-mapping */
-    int allowPortMapping(unsigned int allowed);
+    int allowPortMapping(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Allow or disallow backup port */
-    int allowSecondaryPort(unsigned int allowed);
+    int allowSecondaryPort(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Set the event system instance used to convey messages to the user */
-    int setUserEventSystem(Events* events);
+    int setUserEventSystem(Events* events) REQUIRES(!_run_m);
 
     /** Set the address and port for the tcp relay that ZeroTier should use */
     void setTcpRelayAddress(const char* tcpRelayAddr, unsigned short tcpRelayPort);
@@ -451,58 +453,58 @@ class NodeService {
     /** Force ZeroTier to only use the the TCP relay */
     void forceTcpRelay(bool enabled);
 
-    void enableEvents();
+    void enableEvents() REQUIRES(!_run_m);
 
     /** Set the roots definition */
-    int setRoots(const void* data, unsigned int len);
+    int setRoots(const void* data, unsigned int len) REQUIRES(!_run_m) REQUIRES(!_store_m);
 
     /** Enable or disable low-bandwidth mode (sends less ambient traffic, network updates happen less frequently) */
     int setLowBandwidthMode(bool enabled);
 
     /** Add Interface prefix to blacklist (prevents ZeroTier from using that interface) */
-    int addInterfacePrefixToBlacklist(const char* prefix, unsigned int len);
+    int addInterfacePrefixToBlacklist(const char* prefix, unsigned int len) REQUIRES(!_run_m) REQUIRES(!_localConfig_m);
 
     /** Return the MAC Address of the node in the given network */
-    uint64_t getMACAddress(uint64_t net_id) const;
+    uint64_t getMACAddress(uint64_t net_id) const REQUIRES(!_nets_m) REQUIRES(!_run_m);
 
     /** Get the string format name of a network */
-    int getNetworkName(uint64_t net_id, char* dst, unsigned int len) const;
+    int getNetworkName(uint64_t net_id, char* dst, unsigned int len) const REQUIRES(!_nets_m) REQUIRES(!_run_m);
 
     /** Allow ZeroTier to cache peer hints to storage */
-    int allowPeerCaching(unsigned int allowed);
+    int allowPeerCaching(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Allow ZeroTier to cache network info to storage */
-    int allowNetworkCaching(unsigned int allowed);
+    int allowNetworkCaching(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Allow ZeroTier to write identities to storage */
-    int allowIdentityCaching(unsigned int allowed);
+    int allowIdentityCaching(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Allow ZeroTier to cache root definitions to storage */
-    int allowRootSetCaching(unsigned int allowed);
+    int allowRootSetCaching(unsigned int allowed) REQUIRES(!_run_m);
 
     /** Return whether broadcast is enabled on the given network */
-    int getNetworkBroadcast(uint64_t net_id);
+    int getNetworkBroadcast(uint64_t net_id) REQUIRES(!_run_m) REQUIRES(!_nets_m);
 
     /** Return the MTU of the given network */
-    int getNetworkMTU(uint64_t net_id);
+    int getNetworkMTU(uint64_t net_id) REQUIRES(!_run_m) REQUIRES(!_nets_m);
 
     /** Return whether the network is public or private */
-    int getNetworkType(uint64_t net_id);
+    int getNetworkType(uint64_t net_id) REQUIRES(!_run_m) REQUIRES(!_nets_m);
 
     /** Return the status of the network join */
-    int getNetworkStatus(uint64_t net_id);
+    int getNetworkStatus(uint64_t net_id) REQUIRES(!_run_m) REQUIRES(!_nets_m);
 
     /** Get the first address assigned by the network */
-    int getFirstAssignedAddr(uint64_t net_id, unsigned int family, struct zts_sockaddr_storage* addr);
+    int getFirstAssignedAddr(uint64_t net_id, unsigned int family, struct zts_sockaddr_storage* addr) REQUIRES(!_nets_m);
 
     /** Get an array of assigned addresses for the given network */
-    int getAllAssignedAddr(uint64_t net_id, struct zts_sockaddr_storage* addr, unsigned int* count);
+    int getAllAssignedAddr(uint64_t net_id, struct zts_sockaddr_storage* addr, unsigned int* count) REQUIRES(!_nets_m);
 
     /** Return whether a managed route of the given family has been assigned by the network */
-    int networkHasRoute(uint64_t net_id, unsigned int family);
+    int networkHasRoute(uint64_t net_id, unsigned int family) REQUIRES(!_nets_m);
 
     /** Return whether an address of the given family has been assigned by the network */
-    int addrIsAssigned(uint64_t net_id, unsigned int family);
+    int addrIsAssigned(uint64_t net_id, unsigned int family) REQUIRES(!_nets_m);
 
     void phyOnTcpAccept(PhySocket* sockL, PhySocket* sockN, void** uptrL, void** uptrN, const struct sockaddr* from)
     {

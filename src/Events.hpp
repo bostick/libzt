@@ -62,6 +62,8 @@
 
 namespace ZeroTier {
 
+extern Mutex events_m;
+
 #ifdef ZTS_ENABLE_JAVA
 #include <jni.h>
 // References to JNI objects and VM kept for future callbacks
@@ -101,7 +103,7 @@ class Events {
     /**
      * Perform one iteration of callback processing
      */
-    void run();
+    void run() REQUIRES(!events_m);
 
     /**
      * Enable callback event processing
@@ -139,12 +141,12 @@ class Events {
     /**
      * Return whether a callback method has been set
      */
-    bool hasCallback();
+    bool hasCallback() REQUIRES(!events_m);
 
     /**
      * Clear pointer reference to user-provided callback function
      */
-    void clrCallback();
+    void clrCallback() REQUIRES(!events_m);
 
     /**
      * Return whether service operation can be performed at this time
