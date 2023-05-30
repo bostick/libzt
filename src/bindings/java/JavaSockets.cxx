@@ -28,6 +28,8 @@
 
 #include <jni.h>
 
+#define ZTS_UNUSED_ARG(x) (void)x
+
 extern int zts_errno;
 
 namespace ZeroTier {
@@ -351,6 +353,8 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1bsd_1write_
     jint offset,
     jint len)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     void* data = env->GetPrimitiveArrayCritical(&(buf[offset]), NULL);   // PENDING: check?
     int retval = zts_bsd_write(fd, data, len);
     env->ReleasePrimitiveArrayCritical(buf, data, 0);
@@ -553,6 +557,8 @@ Java_com_zerotier_sockets_ZeroTierNative_zts_1id_1pair_1is_1valid(JNIEnv* jenv, 
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1init_1from_1storage(JNIEnv* jenv, jclass clazz, jstring path)
 {
+    ZTS_UNUSED_ARG(clazz);
+
     if (! path) {
         return ZTS_ERR_ARG;
     }
@@ -756,12 +762,18 @@ JNIEXPORT jlong JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1compu
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1transport_1is_1ready(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_transport_is_ready(net_id);
 }
 
 JNIEXPORT jlong JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1net_1get_1mac(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_net_get_mac(net_id);
 }
 
@@ -852,6 +864,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1is_1o
 
 JNIEXPORT jlong JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1node_1get_1id(JNIEnv* jenv, jclass clazz)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+
     return zts_node_get_id();
 }
 
@@ -1250,6 +1265,9 @@ JNIEXPORT jint JNICALL Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1query
 JNIEXPORT jint JNICALL
 Java_com_zerotier_sockets_ZeroTierNative_zts_1core_1query_1mc_1count(JNIEnv* jenv, jclass clazz, jlong net_id)
 {
+    ZTS_UNUSED_ARG(jenv);
+    ZTS_UNUSED_ARG(clazz);
+    
     return zts_core_query_mc_count(net_id);
 }
 
