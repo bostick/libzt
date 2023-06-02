@@ -34,6 +34,8 @@
 
 namespace ZeroTier {
 
+extern Mutex lwip_state_m;
+
 /* Forward declarations */
 class Mutex;
 class MAC;

@@ -66,6 +66,8 @@ static const char ZT_TCP_TUNNEL_HELLO[9] = { 0x17,
 
 namespace ZeroTier {
 
+extern Mutex lwip_state_m;
+
 class NodeService;
 struct InetAddress;
 class VirtualTap;

@@ -279,6 +279,9 @@ bool _has_started = false;
 int netifCount = 0;
 
 // Lock to guard access to network stack state changes
+//
+// lwip_state_m lives in VirtualTap.cpp
+//
 Mutex lwip_state_m;
 
 // Callback for when the TCPIP thread has been successfully started

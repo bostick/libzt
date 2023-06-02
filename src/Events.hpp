@@ -22,6 +22,8 @@
 
 #include "ZeroTierSockets.h"
 
+#include "b_mutex.h"
+
 #ifdef __WINDOWS__
 #include <basetsd.h>
 #endif
