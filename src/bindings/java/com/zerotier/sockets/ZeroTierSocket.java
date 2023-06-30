@@ -68,7 +68,11 @@ public class ZeroTierSocket {
         _isConnected = true;
     }
 
-    public ZeroTierSocket(String remoteAddr, int remotePort) throws IOException
+    public ZeroTierSocket(String remoteAddr, int remotePort) throws IOException {
+        this(remoteAddr, remotePort, 0);
+    }
+
+    public ZeroTierSocket(String remoteAddr, int remotePort, int timeout_ms) throws IOException
     {
         _protocol = 0;
         _type = ZeroTierNative.ZTS_SOCK_STREAM;
@@ -84,7 +88,7 @@ public class ZeroTierSocket {
         _zfd = ZeroTierNative.zts_bsd_socket(_family, _type, _protocol);
         setNativeFileDescriptor(_zfd);
         int err;
-        if ((err = ZeroTierNative.zts_connect(_zfd, remoteAddr, remotePort, 0)) < 0) {
+        if ((err = ZeroTierNative.zts_connect(_zfd, remoteAddr, remotePort, timeout_ms)) < 0) {
             throw new IOException("Error while connecting to remote host (" + err + ")");
         }
         _isConnected = true;
@@ -122,6 +126,18 @@ public class ZeroTierSocket {
      */
     public void connect(InetAddress remoteAddr, int remotePort) throws IOException
     {
+        connect(remoteAddr, remotePort, 0);
+    }
+
+    /**
+     * Connect to a remote host
+     * @param remoteAddr Remote address to which this socket should connect
+     * @param remotePort Remote port to which this socket should connect
+     *
+     * @exception IOException when an I/O error occurs
+     */
+    public void connect(InetAddress remoteAddr, int remotePort, int timeout_ms) throws IOException
+    {
         if (_zfd < 0) {
             throw new IOException("Invalid socket (fd < 0)");
         }
@@ -132,7 +148,7 @@ public class ZeroTierSocket {
             throw new IOException("Invalid address type. Socket is of type AF_INET6");
         }
         int err;
-        if ((err = ZeroTierNative.zts_connect(_zfd, remoteAddr.getHostAddress(), remotePort, 0)) < 0) {
+        if ((err = ZeroTierNative.zts_connect(_zfd, remoteAddr.getHostAddress(), remotePort, timeout_ms)) < 0) {
             throw new IOException("Error while connecting to remote host (" + err + ")");
         }
         _isConnected = true;

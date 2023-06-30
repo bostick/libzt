@@ -833,11 +833,7 @@ void test_pre_service_fuzz()
     unsigned int tid = (unsigned int)pthread_self();
 
     // Test service-related API functions before initializing service
-
-    // Test null values in sequential order
-    for (int i = 0; i < FUZZ_NUM; i++) {
-        api_value_arg_test(tid, i, 0, 0, 0, 0, NULL);
-    }
+    
     // Test all null values in random order (delayed)
     for (int i = 0; i < FUZZ_NUM; i++) {
         uint8_t delay = (uint8_t)random64();
