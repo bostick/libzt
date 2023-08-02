@@ -435,8 +435,8 @@ public class ZeroTierNative {
     public static native int zts_addr_is_assigned(long net_id, int family);
     public static native String zts_addr_get_str(long net_id, int family);
     // public static native int zts_addr_get_all(long net_id, struct sockaddr_storage* addr,  int* count);
-    // public static native int zts_addr_compute_6plane(/*const*/ long net_id, /*const*/ long node_id, struct
-    // sockaddr_storage* addr); public static native int zts_addr_compute_rfc4193(/*const*/ long net_id, /*const*/ long
+    // public static native int zts_addr_compute_6plane(/*const*/ long net_id, /*const*/ long node_id, struct sockaddr_storage* addr);
+    // public static native int zts_addr_compute_rfc4193(/*const*/ long net_id, /*const*/ long
     // node_id, struct sockaddr_storage* addr);
     public static native int zts_addr_compute_rfc4193_str(long net_id, long node_id, String dst, int len);
     public static native int zts_addr_compute_6plane_str(long net_id, long node_id, String dst, int len);
