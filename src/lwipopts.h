@@ -51,6 +51,10 @@
 // Misc
 #define LWIP_STATS_LARGE                1
 #define LWIP_NOASSERT                   1
+//
+// LWIP_NOASSERT must be undefined for asserts to work
+//
+#undef LWIP_NOASSERT
 #if __ANDROID__
 #define LWIP_DONT_PROVIDE_BYTEORDER_FUNCTIONS 0
 #endif
@@ -331,7 +335,8 @@ happening sooner than they should.
  * @see @ref multithreading
  */
 #if !defined LWIP_ASSERT_CORE_LOCKED || defined __DOXYGEN__
-#define LWIP_ASSERT_CORE_LOCKED()
+void sys_check_core_locking(void);
+#define LWIP_ASSERT_CORE_LOCKED()       sys_check_core_locking()
 #endif
 
 /**
@@ -340,7 +345,8 @@ happening sooner than they should.
  * @see @ref multithreading
  */
 #if !defined LWIP_MARK_TCPIP_THREAD || defined __DOXYGEN__
-#define LWIP_MARK_TCPIP_THREAD()
+void sys_mark_tcpip_thread(void);
+#define LWIP_MARK_TCPIP_THREAD()        sys_mark_tcpip_thread()
 #endif
 /**
  * @}
@@ -2308,6 +2314,9 @@ happening sooner than they should.
 #define LWIP_IPV6                       1
 #endif
 
+// Assertion "sizeof(struct ip6_reass_helper) <= IP6_FRAG_HLEN, set IPV6_FRAG_COPYHEADER to 1" failed at line 119 in /Users/brenton/development/github/libzt/ext/lwip/src/core/ipv6/ip6_frag.c
+#define IPV6_FRAG_COPYHEADER            1
+
 /**
  * IPV6_REASS_MAXAGE: Maximum time (in multiples of IP6_REASS_TMR_INTERVAL - so seconds, normally)
  * a fragmented IP packet waits for all fragments to arrive. If not all fragments arrived
@@ -3450,5 +3459,27 @@ happening sooner than they should.
 /**
  * @}
  */
+
+
+#if !NO_SYS
+#if LWIP_TCPIP_CORE_LOCKING
+#ifdef __cplusplus
+extern "C" {
+#endif
+void sys_lock_tcpip_core(void);
+#ifdef __cplusplus
+}
+#endif
+#define LOCK_TCPIP_CORE() sys_lock_tcpip_core()
+#ifdef __cplusplus
+extern "C" {
+#endif
+void sys_unlock_tcpip_core(void);
+#ifdef __cplusplus
+}
+#endif
+#define UNLOCK_TCPIP_CORE() sys_unlock_tcpip_core()
+#endif
+#endif
 
 #endif /* LWIP_HDR_OPT_H */
