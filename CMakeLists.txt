@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.5)
 project(zt)
 find_package(Threads)
 
@@ -58,6 +58,33 @@ endif()
 
 # Linux
 # if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
+
+
+
+
+#
+# GLOBALS
+#
+
+#
+# make sure that libs and bins are not created inside lib/Debug or bin/Debug on Multi-configuration generators (VS, Xcode)
+#
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/lib)
+
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/lib)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/lib)
+
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/bin)
+
+set(CMAKE_PDB_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/pdb-output)
+set(CMAKE_PDB_OUTPUT_DIRECTORY_DEBUG ${PROJECT_BINARY_DIR}/pdb-output)
+set(CMAKE_PDB_OUTPUT_DIRECTORY_RELEASE ${PROJECT_BINARY_DIR}/pdb-output)
+
 
 # ------------------------------------------------------------------------------
 # |                             SOURCE DIRECTORIES                             |
