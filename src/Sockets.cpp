@@ -24,6 +24,8 @@
 #include "lwip/dns.h"
 #include "lwip/netdb.h"
 
+#include "Inst.hpp"
+
 #if defined(__ANDROID__)
 #include <sys/endian.h>
 #endif
@@ -46,6 +48,9 @@ int zts_bsd_socket(const int socket_family, const int socket_type, const int pro
 
 int zts_bsd_connect(int fd, const struct zts_sockaddr* addr, zts_socklen_t addrlen)
 {
+
+    INST("enter zts_bsd_connect");
+
     if (! transport_ok()) {
         return ZTS_ERR_SERVICE;
     }
@@ -56,7 +61,12 @@ int zts_bsd_connect(int fd, const struct zts_sockaddr* addr, zts_socklen_t addrl
         || addrlen < (zts_socklen_t)sizeof(struct zts_sockaddr_in)) {
         return ZTS_ERR_ARG;
     }
-    return lwip_connect(fd, (sockaddr*)addr, addrlen);
+
+    int res = lwip_connect(fd, (sockaddr*)addr, addrlen);
+
+    INST("exit zts_bsd_connect");
+
+    return res;
 }
 
 int zts_bsd_bind(int fd, const struct zts_sockaddr* addr, zts_socklen_t addrlen)

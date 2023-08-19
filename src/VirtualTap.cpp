@@ -240,17 +240,17 @@ void VirtualTap::threadMain() throw()
 {
     fd_set readfds, nullfds;
     struct timeval tv;
+
+    SETTHREADNAME("ZT_VirtualTap_threadMain");
+
+    INST("thread starting %s", "ZT_VirtualTap_threadMain");
+
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     FD_ZERO(&readfds);
     FD_ZERO(&nullfds);
     int nfds = (int)std::max(_shutdownSignalPipe[0], 0) + 1;
-#if defined(__linux__)
-    // pthread_setname_np(pthread_self(), vtap_full_name);
-#endif
-#if defined(__APPLE__)
-    // pthread_setname_np(vtap_full_name);
-#endif
+
     while (true) {
         FD_SET(_shutdownSignalPipe[0], &readfds);
         select(nfds, &readfds, &nullfds, &nullfds, &tv);
@@ -294,12 +294,10 @@ static void zts_tcpip_init_done(void* arg)
 
 static void zts_main_lwip_driver_loop(void* arg)
 {
-#if defined(__linux__)
-    // pthread_setname_np(pthread_self(), ZTS_LWIP_THREAD_NAME);
-#endif
-#if defined(__APPLE__)
-    // pthread_setname_np(ZTS_LWIP_THREAD_NAME);
-#endif
+    SETTHREADNAME("ZTS_LWIP_THREAD_NAME");
+
+    INST("thread starting %s", ZTS_LWIP_THREAD_NAME);
+    
     sys_sem_t sem;
     LWIP_UNUSED_ARG(arg);
     if (sys_sem_new(&sem, 0) != ERR_OK) {

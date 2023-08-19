@@ -28,6 +28,8 @@
 #include "Utilities.hpp"
 #include "VirtualTap.hpp"
 
+#include "Inst.hpp"
+
 #if defined(__WINDOWS__)
 #include <iphlpapi.h>
 #include <netioapi.h>
@@ -212,6 +214,8 @@ NodeService::~NodeService()
 
 NodeService::ReasonForTermination NodeService::run()
 {
+    INST("enter NodeService::run");
+
     _run = true;
     try {
         // Create home path (if necessary)
@@ -232,6 +236,9 @@ NodeService::ReasonForTermination NodeService::run()
                         Mutex::Lock _l(_termReason_m);
                         _termReason = ONE_UNRECOVERABLE_ERROR;
                         _fatalErrorMessage = "home path could not be created";
+
+                        INST("exit NodeService::run");
+
                         return _termReason;
                     }
                 }
@@ -277,6 +284,9 @@ NodeService::ReasonForTermination NodeService::run()
             Mutex::Lock _l(_termReason_m);
             _termReason = ONE_UNRECOVERABLE_ERROR;
             _fatalErrorMessage = "cannot bind to local control interface port";
+
+            INST("exit NodeService::run");
+
             return _termReason;
         }
 
@@ -532,6 +542,9 @@ NodeService::ReasonForTermination NodeService::run()
     }
     delete _node;
     _node = (Node*)0;
+
+    INST("exit NodeService::run");
+
     return _termReason;
 }
 
