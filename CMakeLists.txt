@@ -343,6 +343,15 @@ endif()
     add_executable(nonblockingserver
         ${PROJ_DIR}/examples/c/nonblockingserver.c)
     target_link_libraries(nonblockingserver ${STATIC_LIB_NAME})
+
+    add_executable(looping-client
+        ${PROJ_DIR}/examples/c/looping-client.c)
+    target_link_libraries(looping-client ${STATIC_LIB_NAME})
+
+    add_executable(looping-server
+        ${PROJ_DIR}/examples/c/looping-server.c)
+    target_link_libraries(looping-server ${STATIC_LIB_NAME})
+
 endif()
 
 # ------------------------------------------------------------------------------
