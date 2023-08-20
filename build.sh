@@ -349,6 +349,7 @@ host()
     mkdir -p $LIB_OUTPUT_DIR
     mkdir -p $BIN_OUTPUT_DIR
     $CMAKE $VARIANT -H. -B$CACHE_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    # $CMAKE $VARIANT -H. -B$CACHE_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_SANITIZER=Address -DCMAKE_CXX_COMPILER=/opt/homebrew/Cellar/llvm/16.0.6/bin/clang++ -DCMAKE_C_COMPILER=/opt/homebrew/Cellar/llvm/16.0.6/bin/clang
     $CMAKE --build $CACHE_DIR $BUILD_CONCURRENCY
     rm -f $BUILD_OUTPUT_DIR/native
     ln -s $TARGET_BUILD_DIR $BUILD_OUTPUT_DIR/native
@@ -517,6 +518,7 @@ host-jar()
     cp -f src/bindings/java/com/zerotier/sockets/*.java $JAVA_JAR_SOURCE_TREE_DIR
     # Build
     $CMAKE $VARIANT -H. -B$CACHE_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+    # $CMAKE $VARIANT -H. -B$CACHE_DIR -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DUSE_SANITIZER=Address -DCMAKE_CXX_COMPILER=/opt/homebrew/Cellar/llvm/16.0.6/bin/clang++ -DCMAKE_C_COMPILER=/opt/homebrew/Cellar/llvm/16.0.6/bin/clang
     $CMAKE --build $CACHE_DIR $BUILD_CONCURRENCY
     # Package everything
     cp -f $CACHE_DIR/lib/libzt.* $JAVA_JAR_DIR
