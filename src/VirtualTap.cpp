@@ -238,12 +238,11 @@ void VirtualTap::setMtu(unsigned int mtu)
 
 void VirtualTap::threadMain() throw()
 {
-    fd_set readfds, nullfds;
+    fd_set readfds;
     struct timeval tv;
     tv.tv_sec = 0;
     tv.tv_usec = 0;
     FD_ZERO(&readfds);
-    FD_ZERO(&nullfds);
     int nfds = (int)std::max(_shutdownSignalPipe[0], 0) + 1;
 #if defined(__linux__)
     // pthread_setname_np(pthread_self(), vtap_full_name);
@@ -253,7 +252,10 @@ void VirtualTap::threadMain() throw()
 #endif
     while (true) {
         FD_SET(_shutdownSignalPipe[0], &readfds);
-        select(nfds, &readfds, &nullfds, &nullfds, &tv);
+        //
+        // Fix warning: passing argument 3 to ‘restrict’-qualified parameter aliases with argument 4 [-Wrestrict]
+        //
+        select(nfds, &readfds, NULL, NULL, &tv);
         // writes to shutdown pipe terminate thread
         if (FD_ISSET(_shutdownSignalPipe[0], &readfds)) {
             break;

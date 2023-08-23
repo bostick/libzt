@@ -324,8 +324,12 @@ class NodeService {
     /** Leave a network */
     int leave(uint64_t net_id);
 
-    /** Return whether the network is ready for transport services */
-    bool networkIsReady(uint64_t net_id) const;
+    /**
+     * Return whether the network is ready for transport services
+     * 
+     * Return < 0 if error, or 0 or 1
+     */
+    int networkIsReady(uint64_t net_id) const;
 
     /** Lock the service so we can perform queries */
     void obtainLock() const;
@@ -375,7 +379,7 @@ class NodeService {
     /** Set the node's identity */
     int setIdentity(const char* keypair, unsigned int len);
 
-    void nodeStatePutFunction(enum ZT_StateObjectType type, const uint64_t id[2], const void* data, unsigned int len);
+    void nodeStatePutFunction(enum ZT_StateObjectType type, const uint64_t id[2], const void* data, int len);
 
     int nodeStateGetFunction(enum ZT_StateObjectType type, const uint64_t id[2], void* data, unsigned int maxlen);
 
@@ -398,7 +402,7 @@ class NodeService {
 
     int nodePathCheckFunction(uint64_t ztaddr, const int64_t localSocket, const struct sockaddr_storage* remoteAddr);
 
-    int nodePathLookupFunction(uint64_t ztaddr, unsigned int family, struct sockaddr_storage* result);
+    int nodePathLookupFunction(uint64_t ztaddr, int family, struct sockaddr_storage* result);
 
     void tapFrameHandler(
         uint64_t net_id,

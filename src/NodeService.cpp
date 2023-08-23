@@ -867,6 +867,8 @@ int NodeService::nodeVirtualNetworkConfigFunction(
                 *nuptr = (void*)&n;
                 n.tap->setUserEventSystem(_events);
             }
+            // Fix warning: this statement may fall through [-Wimplicit-fallthrough=]
+            // FALLTHROUGH
             // After setting up tap, fall through to CONFIG_UPDATE since we
             // also want to do this...
         case ZT_VIRTUAL_NETWORK_CONFIG_OPERATION_CONFIG_UPDATE:
@@ -1237,18 +1239,29 @@ void NodeService::releaseLock() const
     _nets_m.unlock();
 }
 
-bool NodeService::networkIsReady(uint64_t net_id) const
+int NodeService::networkIsReady(uint64_t net_id) const
 {
     if (! net_id) {
+        //
+        // Fix warning: enum constant in boolean context [-Wint-in-bool-context]
+        //
+        // error
         return ZTS_ERR_ARG;
     }
     Mutex::Lock _l(_nets_m);
     std::map<uint64_t, NetworkState>::const_iterator n(_nets.find(net_id));
     if (n == _nets.end()) {
-        return false;
+        // false
+        return 0;
     }
     auto netState = n->second;
-    return netState.config.assignedAddressCount > 0;
+    if (netState.config.assignedAddressCount > 0) {
+        // true
+        return 1;
+    } else {
+        // false
+        return 0;
+    }
 }
 
 int NodeService::addressCount(uint64_t net_id) const
@@ -1347,7 +1360,8 @@ int NodeService::getRouteAtIdx(
         inet_ntop(AF_INET6, &(in6->sin6_addr), via, ZTS_INET6_ADDRSTRLEN);
     }
     if (strlen(via) == 0) {
-        strncpy(via, "0.0.0.0", 7);
+        // Fix warning: ‘char* strncpy(char*, const char*, size_t)’ output truncated before terminating nul copying 7 bytes from a string of the same length [-Wstringop-truncation]
+        strcpy(via, "0.0.0.0");
         // TODO: Double check
     }
     *flags = netState.config.routes[idx].flags;
@@ -1528,7 +1542,7 @@ void NodeService::nodeStatePutFunction(
     enum ZT_StateObjectType type,
     const uint64_t id[2],
     const void* data,
-    unsigned int len)
+    int len)
 {
     char p[1024] = { 0 };
     FILE* f;
@@ -1603,6 +1617,9 @@ void NodeService::nodeStatePutFunction(
             return;
     }
 
+    //
+    // Fix warning: comparison of unsigned expression in ‘>= 0’ is always true
+    //
     if (len >= 0) {
         // Check to see if we've already written this first. This reduces
         // redundant writes and I/O overhead on most platforms and has
@@ -1889,9 +1906,12 @@ int NodeService::nodePathCheckFunction(
     return 1;
 }
 
-int NodeService::nodePathLookupFunction(uint64_t ztaddr, unsigned int family, struct sockaddr_storage* result)
+int NodeService::nodePathLookupFunction(uint64_t ztaddr, int family, struct sockaddr_storage* result)
 {
     const Hashtable<uint64_t, std::vector<InetAddress> >* lh = (const Hashtable<uint64_t, std::vector<InetAddress> >*)0;
+    //
+    // Fix warning: comparison of unsigned expression in ‘< 0’ is always false
+    //
     if (family < 0) {
         lh = (_node->prng() & 1) ? &_v4Hints : &_v6Hints;
     }
