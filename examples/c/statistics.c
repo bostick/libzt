@@ -9,6 +9,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h> // for PRIx64
 
 int main(int argc, char** argv)
 {
@@ -17,7 +18,7 @@ int main(int argc, char** argv)
         printf("statistics <net_id>\n");
         exit(0);
     }
-    long long int net_id = strtoull(argv[1], NULL, 16);   // At least 64 bits
+    uint64_t net_id = strtoull(argv[1], NULL, 16);
 
     printf("Starting node...\n");
     zts_node_start();
@@ -27,7 +28,7 @@ int main(int argc, char** argv)
         zts_util_delay(50);
     }
 
-    printf("My public identity (node ID) is %llx\n", zts_node_get_id());
+    printf("My public identity (node ID) is %" PRIx64 "\n", zts_node_get_id());
     char keypair[ZTS_ID_STR_BUF_LEN] = { 0 };
     unsigned int len = ZTS_ID_STR_BUF_LEN;
     if (zts_node_get_id_pair(keypair, &len) != ZTS_ERR_OK) {
@@ -35,7 +36,7 @@ int main(int argc, char** argv)
     }
     printf("Identity [public/secret pair] = %s\n", keypair);
 
-    printf("Joining network %llx\n", net_id);
+    printf("Joining network %" PRIx64 "\n", net_id);
     if (zts_net_join(net_id) != ZTS_ERR_OK) {
         printf("Unable to join network. Exiting.\n");
         exit(1);
@@ -54,7 +55,7 @@ int main(int argc, char** argv)
 
     char ipstr[ZTS_IP_MAX_STR_LEN] = { 0 };
     zts_addr_get_str(net_id, ZTS_AF_INET, ipstr, ZTS_IP_MAX_STR_LEN);
-    printf("Join %llx from another machine and ping me at %s\n", net_id, ipstr);
+    printf("Join %" PRIx64 " from another machine and ping me at %s\n", net_id, ipstr);
 
     // Do network stuff!
     // zts_bsd_socket, zts_bsd_connect, etc

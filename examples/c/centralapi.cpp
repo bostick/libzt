@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <inttypes.h> // for PRIx64
 
 // For optional JSON parsing
 #include "../ext/ZeroTierOne/ext/json/json.hpp"
@@ -86,8 +87,8 @@ int main(int argc, char** argv)
 		process_response(rbuf, http_res_code);
 	}
 	// Get network config
-	int64_t nwid = 0x1234567890abcdef;
-	printf("Requesting network config: /api/network/%llx\n", nwid);
+	uint64_t nwid = 0x1234567890abcdef;
+	printf("Requesting network config: /api/network/%" PRIx64 "\n", nwid);
 	if ((err = zts_central_net_get(&http_res_code, nwid)) != ZTS_ERR_OK) {
 		fprintf(stderr, "Error (%d) making the request.\n", err);
 	}
@@ -95,8 +96,8 @@ int main(int argc, char** argv)
 		process_response(rbuf, http_res_code);
 	}
 	// Authorize a node on a network
-	int64_t nodeid = 0x9934343434;
-	printf("Authorizing: /api/network/%llx/member/%llx\n", nwid, nodeid);
+	uint64_t nodeid = 0x9934343434;
+	printf("Authorizing: /api/network/%" PRIx64 "/member/%" PRIx64 "\n", nwid, nodeid);
 	if ((err = zts_central_node_auth(&http_res_code, nwid, nodeid, ZTS_CENTRAL_NODE_AUTH_TRUE))
 	    != ZTS_ERR_OK) {
 		fprintf(stderr, "Error (%d) making the request.\n", err);

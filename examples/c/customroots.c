@@ -7,13 +7,16 @@
 
 #include "ZeroTierSockets.h"
 
+#include "lwip/def.h" // for ntohs
+
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h> // for PRIx64
 
 void print_peer_details(const char* msg, zts_peer_info_t* d)
 {
     printf(" %s\n", msg);
-    printf("\t- peer       : %llx\n", d->peer_id);
+    printf("\t- peer       : %" PRIx64 "\n", d->peer_id);
     printf("\t- role       : %d\n", d->role);
     printf("\t- latency    : %d\n", d->latency);
     printf("\t- version    : %d.%d.%d\n", d->ver_major, d->ver_minor, d->ver_rev);
@@ -103,7 +106,7 @@ int main()
         if (i > 0) {
             printf(",");
         }
-        printf("0x%.2x", (unsigned char)roots_data_out[i]);
+        printf("0x%.2x", roots_data_out[i]);
     }
     printf("\n");
     printf("roots_len    = %d\n", roots_len);

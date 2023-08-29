@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h> // for PRIx64
 
 int main(int argc, char** argv)
 {
@@ -18,7 +19,7 @@ int main(int argc, char** argv)
         exit(0);
     }
     char* storage_path = argv[1];
-    long long int net_id = strtoull(argv[2], NULL, 16);   // At least 64 bits
+    uint64_t net_id = strtoull(argv[2], NULL, 16);
     char* remote_addr = argv[3];
     int remote_port = atoi(argv[4]);
     int err = ZTS_ERR_OK;
@@ -42,9 +43,9 @@ int main(int argc, char** argv)
         zts_util_delay(50);
     }
 
-    printf("Public identity (node ID) is %llx\n", (long long int)zts_node_get_id());
+    printf("Public identity (node ID) is %" PRIx64 "\n", zts_node_get_id());
 
-    printf("Joining network %llx\n", net_id);
+    printf("Joining network %" PRIx64 "\n", net_id);
     if (zts_net_join(net_id) != ZTS_ERR_OK) {
         printf("Unable to join network. Exiting.\n");
         exit(1);

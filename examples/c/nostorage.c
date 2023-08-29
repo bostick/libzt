@@ -13,6 +13,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h> // for PRIx64
 
 char cache_data[ZTS_STORE_DATA_LEN];
 
@@ -99,7 +100,7 @@ int main(int argc, char** argv)
     // Do network stuff!
     // zts_bsd_socket, zts_bsd_connect, etc
 
-    printf("Node %llx is now online. Idling.\n", zts_node_get_id());
+    printf("Node %" PRIx64 " is now online. Idling.\n", zts_node_get_id());
     while (1) {
         zts_util_delay(500);   // Idle indefinitely
     }

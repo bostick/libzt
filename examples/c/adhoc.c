@@ -8,6 +8,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <inttypes.h> // for PRIx64
 
 /*
 
@@ -44,7 +45,7 @@ int main(int argc, char** argv)
 
     uint16_t adhocStartPort = atoi(argv[1]);   // Start of port range your application will use
     uint16_t adhocEndPort = atoi(argv[2]);     // End of port range your application will use
-    long long int net_id = zts_net_compute_adhoc_id(adhocStartPort, adhocEndPort);   // At least 64 bits
+    uint64_t net_id = zts_net_compute_adhoc_id(adhocStartPort, adhocEndPort);
 
     // Start node and get identity
 
@@ -55,7 +56,7 @@ int main(int argc, char** argv)
         zts_util_delay(50);
     }
     uint64_t node_id = zts_node_get_id();
-    printf("My public identity (node ID) is %llx\n", node_id);
+    printf("My public identity (node ID) is %" PRIx64 "\n", node_id);
     char keypair[ZTS_ID_STR_BUF_LEN] = { 0 };
     unsigned int len = ZTS_ID_STR_BUF_LEN;
     if (zts_node_get_id_pair(keypair, &len) != ZTS_ERR_OK) {
@@ -65,7 +66,7 @@ int main(int argc, char** argv)
 
     // Join the adhoc network
 
-    printf("Joining network %llx\n", net_id);
+    printf("Joining network %" PRIx64 "\n", net_id);
     if (zts_net_join(net_id) != ZTS_ERR_OK) {
         printf("Unable to join network. Exiting.\n");
         exit(1);
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
         printf("Unable to compute address (error = %d). Exiting.\n", err);
         exit(1);
     }
-    printf("Join %llx from another machine and ping6 me at %s\n", net_id, ipstr);
+    printf("Join %" PRIx64 " from another machine and ping6 me at %s\n", net_id, ipstr);
 
     // Do network stuff!
     // zts_bsd_socket, zts_bsd_connect, etc

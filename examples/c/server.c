@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <inttypes.h> // for PRIx64
 
 int main(int argc, char** argv)
 {
@@ -18,7 +19,7 @@ int main(int argc, char** argv)
         exit(0);
     }
     char* storage_path = argv[1];
-    long long int net_id = strtoull(argv[2], NULL, 16);   // At least 64 bits
+    uint64_t net_id = strtoull(argv[2], NULL, 16);
     char* local_addr = argv[3];
     unsigned int local_port = atoi(argv[4]);
     int fd, accfd;
@@ -41,11 +42,11 @@ int main(int argc, char** argv)
     while (! zts_node_is_online()) {
         zts_util_delay(50);
     }
-    printf("Public identity (node ID) is %llx\n", zts_node_get_id());
+    printf("Public identity (node ID) is %" PRIx64 "\n", zts_node_get_id());
 
     // Join network
 
-    printf("Joining network %llx\n", net_id);
+    printf("Joining network %" PRIx64 "\n", net_id);
     if (zts_net_join(net_id) != ZTS_ERR_OK) {
         printf("Unable to join network. Exiting.\n");
         exit(1);
@@ -66,7 +67,7 @@ int main(int argc, char** argv)
     }
     char ipstr[ZTS_IP_MAX_STR_LEN] = { 0 };
     zts_addr_get_str(net_id, family, ipstr, ZTS_IP_MAX_STR_LEN);
-    printf("IP address on network %llx is %s\n", net_id, ipstr);
+    printf("IP address on network %" PRIx64 " is %s\n", net_id, ipstr);
 
     // BEGIN Socket Stuff
 
