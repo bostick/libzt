@@ -711,35 +711,10 @@ clean()
     rm -rf $BUILD_OUTPUT_DIR
     # CMake's build system cache
     rm -rf $BUILD_CACHE_DIR
-    # CMake test output
-    rm -rf bin
-    rm -rf Testing
-    rm -rf CMakeFiles
-    rm -rf *.cmake
-    rm -rf CMakeCache.txt
-    rm -rf Makefile
     # Android AAR project binaries and sources (copied from src/bindings/java)
-    rm -rf $ANDROID_PKG_PROJ_DIR/app/build
-    rm -rf $ANDROID_PKG_PROJ_DIR/app/src/main/java/com/zerotier/libzt/*.java
-    rm -rf $ANDROID_PKG_PROJ_DIR/app/.externalNativeBuild
-    # Remove whatever remains
-    find . \
-        \( -name '*.dylib' \
-        -o -name '*.dll'   \
-        -o -name '*.aar'   \
-        -o -name '*.jar'   \
-        -o -name '*.so'    \
-        -o -name '*.a'     \
-        -o -name '*.o'     \
-        -o -name '*.exe'   \
-        -o -name '*.o.d'   \
-        -o -name '*.out'   \
-        -o -name '*.log'   \
-        -o -name '*.dSYM'  \
-        -o -name '*.class' \
-        \) -exec rm -rf {} +
-
-    find . -type d -name "__pycache__" -exec rm -rf {} +
+    cd $ANDROID_PKG_PROJ_DIR
+    ./gradlew clean
+    cd -
     # Python pkg
     # cd pkg/pypi && ./build.sh clean
 }
