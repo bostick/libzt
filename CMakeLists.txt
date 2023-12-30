@@ -718,43 +718,43 @@ if(BUILD_SHARED_LIB)
 endif() # BUILD_SHARED_LIB
 
 # xcode framework
-if(IN_XCODE)
+# if(IN_XCODE)
 
-    # stdint.h is needed for API definitions but can cause conflicts in certain
-    # projects where integer types may already be defined. Thus this flag is used to
-    # exclude their definition in ZeroTierSockets.h
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZTS_NO_STDINT_H=0")
+#     # stdint.h is needed for API definitions but can cause conflicts in certain
+#     # projects where integer types may already be defined. Thus this flag is used to
+#     # exclude their definition in ZeroTierSockets.h
+#     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -DZTS_NO_STDINT_H=0")
 
-    include_directories(${frameworkHeaderGlob})
+#     include_directories(${frameworkHeaderGlob})
 
-    add_library(
-        ${XCODE_FRAMEWORK_NAME} STATIC
-        $<TARGET_OBJECTS:libzt_obj>
-        $<TARGET_OBJECTS:zto_obj>
-        $<TARGET_OBJECTS:libnatpmp_obj>
-        $<TARGET_OBJECTS:miniupnpc_obj>
-        $<TARGET_OBJECTS:lwip_obj>
-        ${libztSrcGlob}
-        ${frameworkHeaderGlob})
+#     add_library(
+#         ${XCODE_FRAMEWORK_NAME} STATIC
+#         $<TARGET_OBJECTS:libzt_obj>
+#         $<TARGET_OBJECTS:zto_obj>
+#         $<TARGET_OBJECTS:libnatpmp_obj>
+#         $<TARGET_OBJECTS:miniupnpc_obj>
+#         $<TARGET_OBJECTS:lwip_obj>
+#         ${libztSrcGlob}
+#         ${frameworkHeaderGlob})
 
-    set_target_properties(${XCODE_FRAMEWORK_NAME} PROPERTIES ENABLE_BITCODE "YES")
-    set_target_properties(${XCODE_FRAMEWORK_NAME}
-                                                PROPERTIES BITCODE_GENERATION_MODE bitcode)
-    target_compile_options(${XCODE_FRAMEWORK_NAME} PUBLIC -fembed-bitcode)
-    target_link_libraries(${XCODE_FRAMEWORK_NAME} PUBLIC -fembed-bitcode)
+#     set_target_properties(${XCODE_FRAMEWORK_NAME} PROPERTIES ENABLE_BITCODE "YES")
+#     set_target_properties(${XCODE_FRAMEWORK_NAME}
+#                                                 PROPERTIES BITCODE_GENERATION_MODE bitcode)
+#     target_compile_options(${XCODE_FRAMEWORK_NAME} PUBLIC -fembed-bitcode)
+#     target_link_libraries(${XCODE_FRAMEWORK_NAME} PUBLIC -fembed-bitcode)
 
-    set_target_properties(
-        ${XCODE_FRAMEWORK_NAME}
-        PROPERTIES
-            FRAMEWORK YES
-            FRAMEWORK_VERSION A
-            XCODE_ATTRIBUTE_DEFINES_MODULE YES
-            MACOSX_FRAMEWORK_IDENTIFIER com.cmake.${XCODE_FRAMEWORK_NAME}
-            XCODE_ATTRIBUTE_MODULEMAP_FILE "${PROJ_DIR}/pkg/apple/module.modulemap"
-            PUBLIC_HEADER "${frameworkHeaderGlob}"
-            XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
-            XCODE_ATTRIBUTE_CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES YES)
-endif()
+#     set_target_properties(
+#         ${XCODE_FRAMEWORK_NAME}
+#         PROPERTIES
+#             FRAMEWORK YES
+#             FRAMEWORK_VERSION A
+#             XCODE_ATTRIBUTE_DEFINES_MODULE YES
+#             MACOSX_FRAMEWORK_IDENTIFIER com.cmake.${XCODE_FRAMEWORK_NAME}
+#             XCODE_ATTRIBUTE_MODULEMAP_FILE "${PROJ_DIR}/pkg/apple/module.modulemap"
+#             PUBLIC_HEADER "${frameworkHeaderGlob}"
+#             XCODE_ATTRIBUTE_CODE_SIGN_IDENTITY "iPhone Developer"
+#             XCODE_ATTRIBUTE_CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES YES)
+# endif()
 
 # ------------------------------------------------------------------------------
 # |                                  SELFTEST                                  |
